@@ -10,6 +10,6 @@ namespace TrybeHotel.Models
         [Key]
         public int CityId { get; set; }
         public string? Name { get; set; }
-        public virtual IEnumerable<Hotel>? Hotels { get; set; }
+        public virtual IEnumerable<Hotel>? Hotels { get; set; } = null!;
     }
 }

@@ -19,4 +19,22 @@ public class TrybeHotelContext : DbContext, ITrybeHotelContext
             optionsBuilder.UseSqlServer(connectionString);
         }
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Hotel>()
+                    .HasOne(h => h.City)
+                    .WithMany(c => c.Hotels)
+                    .HasForeignKey(h => h.CityId);
+
+        modelBuilder.Entity<City>()
+                    .HasMany(c => c.Hotels)
+                    .WithOne(h => h.City)
+                    .HasForeignKey(h => h.CityId);
+
+        modelBuilder.Entity<Room>()
+                    .HasOne(r => r.Hotel)
+                    .WithMany(h => h.Rooms)
+                    .HasForeignKey(r => r.HotelId);
+    }
 }

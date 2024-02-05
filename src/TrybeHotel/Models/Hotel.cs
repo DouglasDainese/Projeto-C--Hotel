@@ -11,6 +11,6 @@ public class Hotel
 
   public string? Address { get; set; }
   public int CityId { get; set; }
-  public virtual ICollection<Room>? Rooms { get; set; }
-  public City? City { get; set; }
+  public virtual ICollection<Room>? Rooms { get; set; } = null!;
+  public virtual City? City { get; set; } = null!;
 }
