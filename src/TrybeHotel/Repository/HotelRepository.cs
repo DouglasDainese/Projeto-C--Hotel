@@ -17,16 +17,17 @@ namespace TrybeHotel.Repository
         {
             var hotels = _context.Hotels
                 .Include(hotel => hotel.City)
+                .ToList()
                 .Select(h => new HotelDto
                 {
                     HotelId = h.HotelId,
                     Name = h.Name,
                     Address = h.Address,
                     CityId = h.CityId,
-                    CityName = h.City.Name
+                    CityName = h.City?.Name
                 });
 
-            return hotels.ToList();
+            return hotels;
         }
 
         // 5. Desenvolva o endpoint POST /hotel
