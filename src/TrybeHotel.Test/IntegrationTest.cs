@@ -78,18 +78,10 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(System.Net.HttpStatusCode.OK, response?.StatusCode);
 
         var responseBodyString = await response.Content.ReadAsStringAsync();
-
-
         var cities = JsonConvert.DeserializeObject<List<CityDto>>(responseBodyString);
-
-
         Assert.NotEmpty(cities);
-
-        foreach (var city in cities)
-        {
-            Assert.True(city.CityId > 0);
-            Assert.False(string.IsNullOrEmpty(city.Name));
-        }
+        Assert.Contains("Manaus", cities?[0].Name);
+        Assert.Contains("Palmas", cities?[1].Name);
     }
 
     [Trait("Category", "Meus testes")]
@@ -112,8 +104,8 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         CityDto jsonResponse = JsonConvert.DeserializeObject<CityDto>(responseString);
 
         Assert.Equal(System.Net.HttpStatusCode.Created, response?.StatusCode);
-        Assert.Equal(3, jsonResponse.CityId);
-        Assert.Equal("Nova Iguaçu", jsonResponse.Name);
+        Assert.Equal(3, jsonResponse?.CityId);
+        Assert.Equal("Nova Iguaçu", jsonResponse?.Name);
     }
 
 
@@ -228,6 +220,16 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response?.StatusCode);
 
+    }
+
+    [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Verifica se retorna um erro em rota inexistente")]
+    [InlineData("/cities")]
+    public async Task TestNotFound(string url)
+    {
+        var response = await _clientTest.GetAsync(url);
+
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, response?.StatusCode);
     }
 
 }
