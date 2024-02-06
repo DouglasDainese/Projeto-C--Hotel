@@ -81,5 +81,44 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotEmpty(cities);
     }
 
+    [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Testando endpoint de hotéis")]
+    [InlineData("/hotel")]
+    public async Task TestGetHotels(string url)
+    {
+        var response = await _clientTest.GetAsync(url);
 
+        Assert.Equal(System.Net.HttpStatusCode.OK, response?.StatusCode);
+
+        var responseBodyString = await response.Content.ReadAsStringAsync();
+
+        var hotels = JsonConvert.DeserializeObject<List<HotelDto>>(responseBodyString);
+
+        Assert.NotEmpty(hotels);
+
+        var firstHotel = hotels.First();
+        Assert.Equal("Trybe Hotel Palmas", firstHotel.Name);
+        Assert.Equal("Address 2", firstHotel.Address);
+        Assert.Equal("Palmas", firstHotel.CityName);
+
+    }
+
+    [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Testando endpoint de quartos")]
+    [InlineData("/room/1")]
+    public async Task TestGetRooms(string url)
+    {
+        var response = await _clientTest.GetAsync(url);
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response?.StatusCode);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var rooms = JsonConvert.DeserializeObject<List<RoomDto>>(responseContent);
+
+
+        Assert.NotEmpty(rooms);
+        var firstRoom = rooms.First();
+        Assert.Equal("Room 3", firstRoom.Name);
+        Assert.Equal(4, firstRoom.Capacity);
+        Assert.Equal("Image 3", firstRoom.Image);
+    }
 }
