@@ -121,4 +121,14 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(4, firstRoom.Capacity);
         Assert.Equal("Image 3", firstRoom.Image);
     }
+
+    [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Deletar um quarto por um id")]
+    [InlineData("/room/1")]
+    public async Task TestRoomController(string url)
+    {
+        var response = await _clientTest.DeleteAsync(url);
+
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, response?.StatusCode);
+    }
 }
