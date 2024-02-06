@@ -1,4 +1,5 @@
 namespace TrybeHotel.Test;
+using TrybeHotel.Dto;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
@@ -13,14 +14,15 @@ using System.IO;
 
 
 
-public class IntegrationTest: IClassFixture<WebApplicationFactory<Program>>
+public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 {
-     public HttpClient _clientTest;
+    public HttpClient _clientTest;
 
-     public IntegrationTest(WebApplicationFactory<Program> factory)
+    public IntegrationTest(WebApplicationFactory<Program> factory)
     {
         //_factory = factory;
-        _clientTest = factory.WithWebHostBuilder(builder => {
+        _clientTest = factory.WithWebHostBuilder(builder =>
+        {
             builder.ConfigureServices(services =>
             {
                 var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<TrybeHotelContext>));
@@ -44,12 +46,12 @@ public class IntegrationTest: IClassFixture<WebApplicationFactory<Program>>
                     appContext.Database.EnsureCreated();
                     appContext.Database.EnsureDeleted();
                     appContext.Database.EnsureCreated();
-                    appContext.Cities.Add(new City {CityId = 1, Name = "Manaus"});
-                    appContext.Cities.Add(new City {CityId = 2, Name = "Palmas"});
+                    appContext.Cities.Add(new City { CityId = 1, Name = "Manaus" });
+                    appContext.Cities.Add(new City { CityId = 2, Name = "Palmas" });
                     appContext.SaveChanges();
-                    appContext.Hotels.Add(new Hotel {HotelId = 1, Name = "Trybe Hotel Manaus", Address = "Address 1", CityId = 1});
-                    appContext.Hotels.Add(new Hotel {HotelId = 2, Name = "Trybe Hotel Palmas", Address = "Address 2", CityId = 2});
-                    appContext.Hotels.Add(new Hotel {HotelId = 3, Name = "Trybe Hotel Ponta Negra", Address = "Addres 3", CityId = 1});
+                    appContext.Hotels.Add(new Hotel { HotelId = 1, Name = "Trybe Hotel Manaus", Address = "Address 1", CityId = 1 });
+                    appContext.Hotels.Add(new Hotel { HotelId = 2, Name = "Trybe Hotel Palmas", Address = "Address 2", CityId = 2 });
+                    appContext.Hotels.Add(new Hotel { HotelId = 3, Name = "Trybe Hotel Ponta Negra", Address = "Addres 3", CityId = 1 });
                     appContext.SaveChanges();
                     appContext.Rooms.Add(new Room { RoomId = 1, Name = "Room 1", Capacity = 2, Image = "Image 1", HotelId = 1 });
                     appContext.Rooms.Add(new Room { RoomId = 2, Name = "Room 2", Capacity = 3, Image = "Image 2", HotelId = 1 });
@@ -73,6 +75,11 @@ public class IntegrationTest: IClassFixture<WebApplicationFactory<Program>>
     {
         var response = await _clientTest.GetAsync(url);
         Assert.Equal(System.Net.HttpStatusCode.OK, response?.StatusCode);
+
+        var responseBodyString = await response?.Content.ReadAsStringAsync();
+        var cities = JsonConvert.DeserializeObject<List<CityDto>>(responseBodyString);
+        Assert.NotEmpty(cities);
     }
+
 
 }
