@@ -69,20 +69,31 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Trait("Category", "Meus testes")]
-    [Theory(DisplayName = "Executando meus testes")]
+    [Theory(DisplayName = "Executando meus testes req 2")]
     [InlineData("/city")]
     public async Task TestGet(string url)
     {
         var response = await _clientTest.GetAsync(url);
+
         Assert.Equal(System.Net.HttpStatusCode.OK, response?.StatusCode);
 
-        var responseBodyString = await response?.Content.ReadAsStringAsync();
+        var responseBodyString = await response.Content.ReadAsStringAsync();
+
+
         var cities = JsonConvert.DeserializeObject<List<CityDto>>(responseBodyString);
+
+
         Assert.NotEmpty(cities);
+
+        foreach (var city in cities)
+        {
+            Assert.True(city.CityId > 0);
+            Assert.False(string.IsNullOrEmpty(city.Name));
+        }
     }
 
     [Trait("Category", "Meus testes")]
-    [Theory(DisplayName = "Executando meus testes na rota post /city")]
+    [Theory(DisplayName = "Executando meus testes na rota post /city req 3")]
     [InlineData("/city")]
     public async Task TestPostCity(string url)
     {
@@ -105,8 +116,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal("Nova Iguaçu", jsonResponse.Name);
     }
 
+
     [Trait("Category", "Meus testes")]
-    [Theory(DisplayName = "Testando endpoint de hotéis")]
+    [Theory(DisplayName = "Testando endpoint de hotéis req 4")]
     [InlineData("/hotel")]
     public async Task TestGetHotels(string url)
     {
@@ -128,7 +140,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Trait("Category", "Meus testes")]
-    [Theory(DisplayName = "Executando meus testes na rota post /hotel")]
+    [Theory(DisplayName = "Executando meus testes na rota post /hotel req 5")]
     [InlineData("/hotel")]
     public async Task TestPostHotel(string url)
     {
@@ -157,7 +169,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Trait("Category", "Meus testes")]
-    [Theory(DisplayName = "Testando endpoint de quartos")]
+    [Theory(DisplayName = "Testando endpoint de quartos req 6")]
     [InlineData("/room/1")]
     public async Task TestGetRooms(string url)
     {
@@ -177,6 +189,37 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Executando meus testes na rota post /room req 7")]
+    [InlineData("/room")]
+    public async Task TestPostRoom(string url)
+    {
+        var newRoom = new StringContent(
+            JsonConvert.SerializeObject(new Room
+            {
+                Name = "Suite básica",
+                Capacity = 2,
+                Image = "image suite",
+                HotelId = 1
+            }),
+            System.Text.Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _clientTest.PostAsync(url, newRoom);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        RoomDto jsonResponse = JsonConvert.DeserializeObject<RoomDto>(responseString);
+
+        Assert.Equal(System.Net.HttpStatusCode.Created, response?.StatusCode);
+        Assert.Equal(10, jsonResponse.RoomId);
+        Assert.Equal("Suite básica", jsonResponse.Name);
+        Assert.Equal(2, jsonResponse.Capacity);
+        Assert.Equal("image suite", jsonResponse.Image);
+        Assert.Equal(1, jsonResponse.Hotel.HotelId);
+        Assert.Equal("Trybe Hotel Manaus", jsonResponse.Hotel.Name);
+    }
+
+    [Trait("Category", "Meus testes")]
     [Theory(DisplayName = "Deletar um quarto por um id")]
     [InlineData("/room/1")]
     public async Task TestRoomController(string url)
@@ -184,5 +227,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         var response = await _clientTest.DeleteAsync(url);
 
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response?.StatusCode);
+
     }
+
 }
