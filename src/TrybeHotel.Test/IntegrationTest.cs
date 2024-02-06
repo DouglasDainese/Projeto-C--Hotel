@@ -82,6 +82,30 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Executando meus testes na rota post /city")]
+    [InlineData("/city")]
+    public async Task TestPostCity(string url)
+    {
+        var newCity = new StringContent(
+            JsonConvert.SerializeObject(new CityDto
+            {
+                Name = "Nova Iguaçu"
+            }),
+            System.Text.Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _clientTest.PostAsync(url, newCity);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        CityDto jsonResponse = JsonConvert.DeserializeObject<CityDto>(responseString);
+
+        Assert.Equal(System.Net.HttpStatusCode.Created, response?.StatusCode);
+        Assert.Equal(3, jsonResponse.CityId);
+        Assert.Equal("Nova Iguaçu", jsonResponse.Name);
+    }
+
+    [Trait("Category", "Meus testes")]
     [Theory(DisplayName = "Testando endpoint de hotéis")]
     [InlineData("/hotel")]
     public async Task TestGetHotels(string url)
@@ -104,6 +128,35 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Trait("Category", "Meus testes")]
+    [Theory(DisplayName = "Executando meus testes na rota post /hotel")]
+    [InlineData("/hotel")]
+    public async Task TestPostHotel(string url)
+    {
+        var newHotel = new StringContent(
+            JsonConvert.SerializeObject(new HotelDto
+            {
+                Name = "Copacabana Palace",
+                Address = "Avenida Atlântica, 1500",
+                CityId = 2
+            }),
+            System.Text.Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _clientTest.PostAsync(url, newHotel);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        HotelDto jsonResponse = JsonConvert.DeserializeObject<HotelDto>(responseString);
+
+        Assert.Equal(System.Net.HttpStatusCode.Created, response?.StatusCode);
+        Assert.Equal(2, jsonResponse.CityId);
+        Assert.Equal("Palmas", jsonResponse.CityName);
+        Assert.Equal("Copacabana Palace", jsonResponse.Name);
+        Assert.Equal("Avenida Atlântica, 1500", jsonResponse.Address);
+        Assert.Equal(4, jsonResponse.HotelId);
+    }
+
+    [Trait("Category", "Meus testes")]
     [Theory(DisplayName = "Testando endpoint de quartos")]
     [InlineData("/room/1")]
     public async Task TestGetRooms(string url)
@@ -117,6 +170,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.NotEmpty(rooms);
         var firstRoom = rooms.First();
+        Assert.Equal(3, firstRoom.RoomId);
         Assert.Equal("Room 3", firstRoom.Name);
         Assert.Equal(4, firstRoom.Capacity);
         Assert.Equal("Image 3", firstRoom.Image);
